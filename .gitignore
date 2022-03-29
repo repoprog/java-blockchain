@@ -1,0 +1,4 @@
+# Project exclude paths
+/.gradle/
+/Topics/Decorator/Coffee Decorator/out/
+/Topics/Decorator/Coffee Decorator/out/production/classes/

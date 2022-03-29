@@ -1,12 +1,16 @@
 package blockchain;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Block {
-    private int id;
-    private Long timeStamp;
-    private String previousHash;
+public class Block implements Serializable {
+    private static final Long serialVersionUID = 7L;
+    private final int id;
+    private final Long timeStamp;
+    private long magicNumber;
+    private final String previousHash;
     private String hash;
+    private Long genTime;
 
     public Block(int id, String previousHash) {
         this.id = id;
@@ -15,11 +19,24 @@ public class Block {
         this.hash = calculateBlockHash();
     }
 
-    public int getId() {
-        return id;
+    public void setHash(String hash) {
+        this.hash = hash;
     }
+
     public String getHash() {
         return hash;
+    }
+
+    public Long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setMagicNumber(long magicNumber) {
+        this.magicNumber = magicNumber;
+    }
+
+    public void setGenTime(Long genTime) {
+        this.genTime = genTime;
     }
 
     public String getPreviousHash() {
@@ -29,15 +46,19 @@ public class Block {
     public String calculateBlockHash() {
         String dataToHash = previousHash
                 + timeStamp
-                + id;
+                + id
+                + magicNumber;
         return StringUtil.applySha256(dataToHash);
     }
 
     public String toString() {
-       return "Block:\n" +
+        return "Block:\n" +
                 "Id:" + id + "\n" +
                 "Timestamp: " + timeStamp + "\n" +
+                "Magic number:" + magicNumber + "\n" +
                 "Hash of the previous block: \n" + previousHash + "\n" +
-                "Hash of the block: \n" +  hash + "\n";
+                "Hash of the block: \n" + hash + "\n" +
+                "Block was generating for " + genTime
+                + " seconds\n";
     }
 }
