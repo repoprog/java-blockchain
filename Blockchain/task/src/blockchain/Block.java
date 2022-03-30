@@ -5,12 +5,14 @@ import java.util.Date;
 
 public class Block implements Serializable {
     private static final Long serialVersionUID = 7L;
+    private Long minerId;
     private final int id;
     private final Long timeStamp;
     private long magicNumber;
     private final String previousHash;
     private String hash;
     private Long genTime;
+    private String diffNMsg;
 
     public Block(int id, String previousHash) {
         this.id = id;
@@ -19,13 +21,25 @@ public class Block implements Serializable {
         this.hash = calculateBlockHash();
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+    public Long getGenTime() {
+        return genTime;
+    }
+
+    public void setMinerId(Long minerId) {
+        this.minerId = minerId;
+    }
+
+    public void setDiffNMsg(String diffNMsg) {
+        this.diffNMsg = diffNMsg;
     }
 
     public String getHash() {
         return hash;
     }
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
 
     public Long getTimeStamp() {
         return timeStamp;
@@ -53,12 +67,14 @@ public class Block implements Serializable {
 
     public String toString() {
         return "Block:\n" +
+                "Created by miner # " + minerId + "\n" +
                 "Id:" + id + "\n" +
                 "Timestamp: " + timeStamp + "\n" +
                 "Magic number:" + magicNumber + "\n" +
                 "Hash of the previous block: \n" + previousHash + "\n" +
                 "Hash of the block: \n" + hash + "\n" +
                 "Block was generating for " + genTime
-                + " seconds\n";
+                + " seconds\n" +
+                "N " + diffNMsg + "\n";
     }
 }

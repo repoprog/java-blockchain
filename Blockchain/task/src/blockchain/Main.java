@@ -2,10 +2,12 @@ package blockchain;
 
 import java.io.File;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java                                                                                                                                                                                  .util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+    public static void main(String[] args) throws InterruptedException {
         File file = new File("blockchain.txt");
 
         if (file.exists()) {
@@ -13,14 +15,16 @@ public class Main {
             blockchain = loadFromFile(blockchain, file);
             blockchain.isChainValid();
         }
-        Blockchain blockchain = new Blockchain();
-        System.out.println("Enter how many zeros the hash must start with:");
-        blockchain.setProofNumber(scanner.nextInt());
+        BlocksMine mine = new BlocksMine();
+        mine.setProofNumber(0);
 
+        Blockchain blockchain = new Blockchain();
+        ExecutorService executor = Executors.newFixedThreadPool(4);
         for (int i = 0; i < 5; i++) {
-            blockchain.createNewBlock();
+            executor.submit(() -> mine.createNewBlock(blockchain));
             saveToFile(blockchain, file);
         }
+        executor.awaitTermination(10, TimeUnit.SECONDS);
         System.out.println(blockchain);
     }
 

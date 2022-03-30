@@ -7,28 +7,21 @@ public class Blockchain implements Serializable {
 
     private static final long serialVersionUID = 7L;
     private final List<Block> blocks = new ArrayList<>();
-    private String proofNumber;
 
-    public void setProofNumber(int numOfZeros) {
-        proofNumber = // numOfZeros == 0 ? "0" :
-                new String(new char[numOfZeros]).replace("\0", "0");
+    public List<Block> getBlocks() {
+        return blocks;
     }
 
-    public void createNewBlock() {
-        Block newBlock = blocks.isEmpty() ? new Block(1, "0")
-                : new Block(blocks.size() + 1, blocks.get(blocks.size() - 1).getHash());
-
-        while (!newBlock.getHash().startsWith(proofNumber)) {
-            newBlock.setMagicNumber(generateMagicNumber());
-            newBlock.setHash(newBlock.calculateBlockHash());
-        }
-        Long generationTime = (new Date().getTime() - newBlock.getTimeStamp()) / 1000;
-        newBlock.setGenTime(generationTime);
-        blocks.add(newBlock);
+    public Block getBlock(int index) {
+        return blocks.get(index);
     }
 
-    public Long generateMagicNumber() {
-        return (long) (Math.random() * 100000000000L);
+    public void addBlock(Block block) {
+        blocks.add(block);
+    }
+
+    public int getSize() {
+        return blocks.size();
     }
 
     public boolean isChainValid() {

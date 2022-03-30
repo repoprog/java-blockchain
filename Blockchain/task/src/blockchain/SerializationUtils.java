@@ -15,7 +15,6 @@ public class SerializationUtils {
     }
 
     public static Blockchain deserialize(Blockchain blockchain, File file) {
-
         try (ObjectInputStream in = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream(file)))) {
             blockchain = (Blockchain) in.readObject();
