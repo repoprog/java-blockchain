@@ -29,7 +29,7 @@ public class Blockchain implements Serializable {
         for (int i = 0; i < blocks.size(); i++) {
             String previousHash = i == 0 ? "0" : blocks.get(i - 1).getHash();
             if (!blocks.get(i).getHash().equals(blocks.get(i).calculateBlockHash())
-                    && previousHash.equals(blocks.get(i).getPreviousHash())) {
+                    || !previousHash.equals(blocks.get(i).getPreviousHash())) {
                 return false;
             }
         }

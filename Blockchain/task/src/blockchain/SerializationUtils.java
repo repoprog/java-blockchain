@@ -14,10 +14,11 @@ public class SerializationUtils {
         }
     }
 
-    public static Blockchain deserialize(Blockchain blockchain, File file) {
+    public static Blockchain deserialize(File file) {
+        Blockchain blockchain = null;
         try (ObjectInputStream in = new ObjectInputStream(
                 new BufferedInputStream(new FileInputStream(file)))) {
-            blockchain = (Blockchain) in.readObject();
+           blockchain = (Blockchain) in.readObject();
         } catch (FileNotFoundException e) {
             System.out.println("File not found " + e);
         } catch (IOException e) {

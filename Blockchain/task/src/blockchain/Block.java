@@ -4,29 +4,36 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class Block implements Serializable {
-    private static final Long serialVersionUID = 7L;
-    private Long minerId;
+    private static final long serialVersionUID = 7L;
+    private long minerID;
     private final int id;
-    private final Long timeStamp;
+    private final long timeStamp;
     private long magicNumber;
     private final String previousHash;
     private String hash;
-    private Long genTime;
+    private String blockData;
+    private long genTime;
     private String diffNMsg;
 
-    public Block(int id, String previousHash) {
+
+    public Block() {
+        this(1, "0", "no messages");
+    }
+
+    public Block(int id, String previousHash, String blockData) {
         this.id = id;
         this.timeStamp = new Date().getTime();
         this.previousHash = previousHash;
         this.hash = calculateBlockHash();
+        this.blockData = blockData;
     }
 
-    public Long getGenTime() {
+    public long getGenTime() {
         return genTime;
     }
 
-    public void setMinerId(Long minerId) {
-        this.minerId = minerId;
+    public void setMinerID(long minerID) {
+        this.minerID = minerID;
     }
 
     public void setDiffNMsg(String diffNMsg) {
@@ -41,7 +48,7 @@ public class Block implements Serializable {
     }
 
 
-    public Long getTimeStamp() {
+    public long getTimeStamp() {
         return timeStamp;
     }
 
@@ -49,7 +56,7 @@ public class Block implements Serializable {
         this.magicNumber = magicNumber;
     }
 
-    public void setGenTime(Long genTime) {
+    public void setGenTime(long genTime) {
         this.genTime = genTime;
     }
 
@@ -57,22 +64,28 @@ public class Block implements Serializable {
         return previousHash;
     }
 
+    public void setBlockData(String data) {
+        this.blockData = data;
+    }
+
     public String calculateBlockHash() {
         String dataToHash = previousHash
                 + timeStamp
                 + id
-                + magicNumber;
+                + magicNumber
+                + blockData;
         return StringUtil.applySha256(dataToHash);
     }
 
     public String toString() {
         return "Block:\n" +
-                "Created by miner # " + minerId + "\n" +
+                "Created by miner # " + minerID + "\n" +
                 "Id:" + id + "\n" +
                 "Timestamp: " + timeStamp + "\n" +
                 "Magic number:" + magicNumber + "\n" +
                 "Hash of the previous block: \n" + previousHash + "\n" +
                 "Hash of the block: \n" + hash + "\n" +
+                "Block data: \n" + blockData + "\n" +
                 "Block was generating for " + genTime
                 + " seconds\n" +
                 "N " + diffNMsg + "\n";

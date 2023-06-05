@@ -1,30 +1,34 @@
 package blockchain;
 
 import java.io.File;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
-import java                                                                                                                                                                                  .util.concurrent.Executors;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        File file = new File("blockchain.txt");
+        final int NUMBER_OF_BLOCKS = 5;
 
+        File file = new File("blockchain.txt");
+        // delete blockchain.txt from project first
+        Blockchain blockchain;
         if (file.exists()) {
-            Blockchain blockchain = new Blockchain();
-            blockchain = loadFromFile(blockchain, file);
-            blockchain.isChainValid();
+            // for this stage file content is not needed and makes impossible
+            //  to pass tests normally chainFromFile = blockchain
+           Blockchain chainFromFile = loadFromFile(file);
+            chainFromFile.isChainValid();
         }
+        blockchain = new Blockchain();
         BlocksMine mine = new BlocksMine();
         mine.setProofNumber(0);
 
-        Blockchain blockchain = new Blockchain();
-        ExecutorService executor = Executors.newFixedThreadPool(4);
-        for (int i = 0; i < 5; i++) {
-            executor.submit(() -> mine.createNewBlock(blockchain));
-            saveToFile(blockchain, file);
+        ExecutorService blockExecutor = Executors.newFixedThreadPool(4);
+        for (int i = 0; i < NUMBER_OF_BLOCKS; i++) {
+            blockExecutor.submit(() -> mine.createNewBlock(blockchain));
+            blockchain.isChainValid();
         }
-        executor.awaitTermination(10, TimeUnit.SECONDS);
+        blockExecutor.shutdown();
+        saveToFile(blockchain, file);
         System.out.println(blockchain);
     }
 
@@ -32,8 +36,8 @@ public class Main {
         SerializationUtils.serialize(blockchain, file);
     }
 
-    public static Blockchain loadFromFile(Blockchain blockchain, File file) {
-        blockchain = SerializationUtils.deserialize(blockchain, file);
-        return blockchain;
+    public static Blockchain loadFromFile(File file) {
+        return SerializationUtils.deserialize(file);
     }
+
 }
