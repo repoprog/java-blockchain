@@ -36,7 +36,7 @@ public class Block implements Serializable {
         this.minerID = minerID;
     }
 
-    public void setDiffNMsg(String diffNMsg) {
+    public void setDiffMsg(String diffNMsg) {
         this.diffNMsg = diffNMsg;
     }
 

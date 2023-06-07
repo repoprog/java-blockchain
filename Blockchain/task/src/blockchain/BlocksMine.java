@@ -62,16 +62,16 @@ public class BlocksMine {
     }
 
     public synchronized void adjustMiningDifficulty(Block block) {
-        int N;
+        int difficulty;
         if (block.getGenTime() < 15) {
             setProofNumber(proofNumber.length() + 1);
-            N = proofNumber.length();
-            block.setDiffNMsg("was increased to " + N);
+            difficulty = proofNumber.length();
+            block.setDiffMsg("was increased to " + difficulty);
         } else if (block.getGenTime() >= 15 && block.getGenTime() <= 60) {
-            block.setDiffNMsg("stays the same");
+            block.setDiffMsg("stays the same");
         } else {
             setProofNumber(proofNumber.length() - 1);
-            block.setDiffNMsg("was decreased by 1");
+            block.setDiffMsg("was decreased by 1");
         }
     }
 
