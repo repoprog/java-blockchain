@@ -2,7 +2,7 @@ package blockchain;
 
 import java.util.Random;
 
-public class RandomDataGenerator {
+public class RandomMsgGenerator {
 
     private static final Random random = new Random();
 
