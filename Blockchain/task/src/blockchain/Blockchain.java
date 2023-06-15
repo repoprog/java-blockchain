@@ -53,7 +53,7 @@ public class Blockchain implements Serializable {
                 BlockData blockData = currentBlock.getBlockData();
                 boolean isValidSignature = false;
                     isValidSignature = cipher.verifySignature(
-                            blockData.getMessage().getBytes(),
+                            blockData.getMessage(),
                             blockData.getSignature(),
                             blockData.getPublicKey()
                     );

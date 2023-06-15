@@ -2,6 +2,7 @@ package blockchain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class Block implements Serializable {
     private static final long serialVersionUID = 7L;
@@ -82,16 +83,24 @@ public class Block implements Serializable {
     }
 
     public String toString() {
-        return "Block:\n" +
-                "Created by miner # " + minerID + "\n" +
-                "Id: " + id + "\n" +
-                "Timestamp: " + timeStamp + "\n" +
-                "Magic number: " + magicNumber + "\n" +
-                "Hash of the previous block: \n" + previousHash + "\n" +
-                "Hash of the block: \n" + hash + "\n" +
-                "Block data: \n" + blockData.getMessage() + "\n" +
-                "Block was generating for " + genTime
-                + " seconds\n" +
-                "N " + diffNMsg + "\n";
+        StringBuilder sb = new StringBuilder();
+        sb.append("Block:\n");
+        sb.append("Created by miner # ").append(minerID).append("\n");
+        sb.append("Id: ").append(id).append("\n");
+        sb.append("Timestamp: ").append(timeStamp).append("\n");
+        sb.append("Magic number: ").append(magicNumber).append("\n");
+        sb.append("Hash of the previous block:\n").append(previousHash).append("\n");
+        sb.append("Hash of the block:\n").append(hash).append("\n");
+        sb.append("Block data:\n");
+
+        List<String> messages = blockData.getMessage();
+        for (String message : messages) {
+            sb.append(message).append("\n");
+        }
+
+        sb.append("Block was generating for ").append(genTime).append(" seconds\n");
+        sb.append("N ").append(diffNMsg).append("\n");
+
+        return sb.toString();
     }
 }

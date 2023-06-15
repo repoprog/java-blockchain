@@ -1,6 +1,7 @@
 package blockchain;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.*;
@@ -19,7 +20,7 @@ public class BlocksMine {
     }
 
     public void createNewBlock(Blockchain chain, AsymmetricCryptography cipher) {
-        generateRandomMsg();
+        List<Future<String>> futuresMsg = generateRandomMsg();
         synchronized (LOCK) {
 
             // create new block and add random asynchronous generated msg to each block (after first)
@@ -33,7 +34,7 @@ public class BlocksMine {
             adjustMiningDifficulty(newBlock);
             chain.addBlock(newBlock);
             chain.isChainValid(cipher);
-            generateBlockData(chain, cipher);
+            generateBlockData(chain, cipher, futuresMsg);
         }
     }
 
@@ -41,16 +42,17 @@ public class BlocksMine {
         return (new Date().getTime() - newBlock.getTimeStamp()) / 1000;
     }
 
-    public void generateRandomMsg() {
+    public List<Future<String>> generateRandomMsg() {
         List<Callable<String>> callables = new ArrayList<>();
         for (int i = 0; i < NUM_THREADS; i++) {
             callables.add(() -> new RandomMsgGenerator().generate());
         }
         try {
-            future = msgExecutor.invokeAll(callables);
+            return msgExecutor.invokeAll(callables);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        return Collections.emptyList();
     }
 
     public void generateMagicNumber(Block newBlock) {
@@ -74,8 +76,8 @@ public class BlocksMine {
         }
     }
 
-    public void generateBlockData(Blockchain chain, AsymmetricCryptography cipher) {
-        String message = synchronizeMsg();
+    public void generateBlockData(Blockchain chain, AsymmetricCryptography cipher, List<Future<String>> futureMsg) {
+        List<String> message = synchronizeMsg(futureMsg);
         BlockData data = new BlockData(chain.getDataID(), message, cipher);
         data.signMessage(message);
         nextBlockData = data;
@@ -83,16 +85,16 @@ public class BlocksMine {
     }
 
 
-    public String synchronizeMsg() {
-        StringBuilder sb = new StringBuilder();
-        for (Future<String> f : future) {
+    public List<String> synchronizeMsg(List<Future<String>> futureMsg) {
+        List<String> message = new ArrayList<>();
+        for (Future<String> f : futureMsg) {
             try { // current thread (from block executor) wait for messages
-                sb.append(f.get());
+                message.add(f.get());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
-        return sb.toString();
+        return message;
     }
 }
 

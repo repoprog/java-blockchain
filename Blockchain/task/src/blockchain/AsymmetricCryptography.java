@@ -1,7 +1,11 @@
 package blockchain;
 
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.security.*;
+import java.util.List;
 
 
 public class AsymmetricCryptography {
@@ -25,24 +29,26 @@ public class AsymmetricCryptography {
         return this.publicKey;
     }
 
-    public byte[] sign(String data) {
+    public byte[] sign(List<String> message) {
         try {
             Signature rsa = Signature.getInstance("SHA1withRSA");
             rsa.initSign(privateKey);
-            rsa.update(data.getBytes());
+            byte[] transactionBytes = getTransactionsAsBytes(message);
+            rsa.update(transactionBytes);
             return rsa.sign();
-        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IOException e) {
             e.printStackTrace();
         }
         return null;
     }
 
     // make private
-    public boolean verifySignature(byte[] message, byte[] signature, PublicKey pubKeyFromBlock) {
+    public boolean verifySignature(List<String> message, byte[] signature, PublicKey pubKeyFromBlock) {
         try {
             Signature sig = Signature.getInstance("SHA1withRSA");
             sig.initVerify(pubKeyFromBlock);
-            sig.update(message);
+            byte[] transactionBytes = getTransactionsAsBytes(message);
+            sig.update(transactionBytes);
             return sig.verify(signature);
         } catch (NoSuchAlgorithmException e) {
             System.err.println("Algorithm not available: " + e.getMessage());
@@ -50,7 +56,17 @@ public class AsymmetricCryptography {
             System.err.println("Invalid public key: " + e.getMessage());
         } catch (SignatureException e) {
             System.err.println("Error during signature verification: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return false;
+    }
+
+    public byte[] getTransactionsAsBytes(List<String> message) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(message);
+        oos.flush();
+        return baos.toByteArray();
     }
 }

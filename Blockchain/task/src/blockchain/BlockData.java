@@ -2,11 +2,12 @@ package blockchain;
 
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.util.List;
 
 
 public class BlockData implements Serializable {
     private static final long serialVersionUID = 7L;
-    private String message;
+    private List<String> message;
     private int id;
     private  PublicKey publicKey;
     private byte[] signature;
@@ -14,18 +15,17 @@ public class BlockData implements Serializable {
 
 
     public BlockData(AsymmetricCryptography cipher) {
-        this(1, "no message", cipher);
+        this(1, List.of("no message"), cipher);
     }
 
-    public BlockData(int id,String message, AsymmetricCryptography cipher) {
+    public BlockData(int id,List<String > message, AsymmetricCryptography cipher) {
         this.id = id;
         this.message = message;
         this.cipher = cipher;
         this.publicKey = cipher.getPublicKey();
     }
 
-    public String getMessage() {
-
+    public List<String> getMessage() {
         return message;
     }
 
@@ -41,8 +41,8 @@ public class BlockData implements Serializable {
         return signature;
     }
 
-    public void signMessage(String msg) {
-            signature = cipher.sign(msg);
+    public void signMessage(List<String> message) {
+            signature = cipher.sign(message);
     }
 
 }
