@@ -31,7 +31,6 @@ public class Blockchain implements Serializable {
 
     public boolean isChainValid(AsymmetricCryptography cipher) {
 
-
             Block previousBlock = blocks.get(0);
 
             for (int i = 1; i < blocks.size(); i++) {
@@ -53,16 +52,11 @@ public class Blockchain implements Serializable {
                 // Verify block data signature
                 BlockData blockData = currentBlock.getBlockData();
                 boolean isValidSignature = false;
-                try {
                     isValidSignature = cipher.verifySignature(
                             blockData.getMessage().getBytes(),
                             blockData.getSignature(),
                             blockData.getPublicKey()
                     );
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
                 if (!isValidSignature) {
                     System.out.println("Invalid blockchain: Invalid signature for block " + currentBlock.getId());
                     return false;
@@ -76,31 +70,6 @@ public class Blockchain implements Serializable {
 
                 previousBlock = currentBlock;
             }
-
-//        for (int i = 0; i < blocks.size(); i++) {
-//            String previousHash = i == 0 ? "0" : blocks.get(i - 1).getHash();
-//            if (!blocks.get(i).getHash().equals(blocks.get(i).calculateBlockHash())
-//                    || !previousHash.equals(blocks.get(i).getPreviousHash())) {
-//                return false;
-//            } //first block has no signature
-//            if( i !=0 ) {
-//                byte[] msgAsBytes = blocks.get(i).getBlockData().getMessage().getBytes();
-//                byte[] signature = blocks.get(i).getBlockData().getSignature();
-//                PublicKey pk = blocks.get(i).getBlockData().getPublicKey();
-//                int dataID = blocks.get(i).getBlockData().getId();
-//                if (!cipher.verifySignature(msgAsBytes, signature, pk)) {
-//                    return false;
-//                }
-//
-//            }
-//
-//            // Verify block data identifier
-//            if (blockData.getId() <= previousBlock.getBlockData().getId()) {
-//                System.out.println("Invalid blockchain: Invalid block data identifier for block " + currentBlock.getId());
-//                return false;
-//            }
-
-
         return true;
     }
 

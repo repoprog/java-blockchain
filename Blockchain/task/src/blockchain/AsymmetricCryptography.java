@@ -1,10 +1,10 @@
 package blockchain;
 
-import java.io.Serializable;
+
 import java.security.*;
 
 
-public class AsymmetricCryptography  {
+public class AsymmetricCryptography {
     private KeyPairGenerator keyGen;
     private KeyPair pair;
     private PrivateKey privateKey;
@@ -37,12 +37,20 @@ public class AsymmetricCryptography  {
         return null;
     }
 
-     // make private
-    public boolean verifySignature(byte[] message, byte[] signature, PublicKey pubKeyFromBlock) throws Exception {
-        Signature sig = Signature.getInstance("SHA1withRSA");
-        sig.initVerify(pubKeyFromBlock);
-        sig.update(message);
-
-        return sig.verify(signature);
+    // make private
+    public boolean verifySignature(byte[] message, byte[] signature, PublicKey pubKeyFromBlock) {
+        try {
+            Signature sig = Signature.getInstance("SHA1withRSA");
+            sig.initVerify(pubKeyFromBlock);
+            sig.update(message);
+            return sig.verify(signature);
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Algorithm not available: " + e.getMessage());
+        } catch (InvalidKeyException e) {
+            System.err.println("Invalid public key: " + e.getMessage());
+        } catch (SignatureException e) {
+            System.err.println("Error during signature verification: " + e.getMessage());
+        }
+        return false;
     }
 }
