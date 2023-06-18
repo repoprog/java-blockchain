@@ -29,11 +29,11 @@ public class AsymmetricCryptography {
         return this.publicKey;
     }
 
-    public byte[] sign(List<String> message) {
+    public byte[] sign(List<Transaction> transactions) {
         try {
             Signature rsa = Signature.getInstance("SHA1withRSA");
             rsa.initSign(privateKey);
-            byte[] transactionBytes = getTransactionsAsBytes(message);
+            byte[] transactionBytes = getTransactionsAsBytes(transactions);
             rsa.update(transactionBytes);
             return rsa.sign();
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IOException e) {
@@ -43,11 +43,11 @@ public class AsymmetricCryptography {
     }
 
     // make private
-    public boolean verifySignature(List<String> message, byte[] signature, PublicKey pubKeyFromBlock) {
+    public boolean verifySignature(List<Transaction> transactions, byte[] signature, PublicKey pubKeyFromBlock) {
         try {
             Signature sig = Signature.getInstance("SHA1withRSA");
             sig.initVerify(pubKeyFromBlock);
-            byte[] transactionBytes = getTransactionsAsBytes(message);
+            byte[] transactionBytes = getTransactionsAsBytes(transactions);
             sig.update(transactionBytes);
             return sig.verify(signature);
         } catch (NoSuchAlgorithmException e) {
@@ -62,10 +62,10 @@ public class AsymmetricCryptography {
         return false;
     }
 
-    public byte[] getTransactionsAsBytes(List<String> message) throws IOException {
+    public byte[] getTransactionsAsBytes(List<Transaction> transactions) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(message);
+        oos.writeObject(transactions);
         oos.flush();
         return baos.toByteArray();
     }

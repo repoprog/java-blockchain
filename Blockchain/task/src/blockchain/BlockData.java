@@ -7,7 +7,7 @@ import java.util.List;
 
 public class BlockData implements Serializable {
     private static final long serialVersionUID = 7L;
-    private List<String> message;
+    private List<Transaction> transactions;
     private int id;
     private  PublicKey publicKey;
     private byte[] signature;
@@ -15,18 +15,19 @@ public class BlockData implements Serializable {
 
 
     public BlockData(AsymmetricCryptography cipher) {
-        this(1, List.of("no message"), cipher);
+        this(1, List.of(new Transaction("Block", "Someone", 100)), cipher);
     }
 
-    public BlockData(int id,List<String > message, AsymmetricCryptography cipher) {
+    public BlockData(int id,List<Transaction> transactions, AsymmetricCryptography cipher) {
         this.id = id;
-        this.message = message;
+        this.transactions = transactions;
         this.cipher = cipher;
         this.publicKey = cipher.getPublicKey();
     }
 
-    public List<String> getMessage() {
-        return message;
+    public List<Transaction> getTransactions() {
+
+        return transactions;
     }
 
     public int getId() {
@@ -41,8 +42,7 @@ public class BlockData implements Serializable {
         return signature;
     }
 
-    public void signMessage(List<String> message) {
-            signature = cipher.sign(message);
+    public void signTransactions(List<Transaction> transactions) {
+            signature = cipher.sign(transactions);
     }
-
 }

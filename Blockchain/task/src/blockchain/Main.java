@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        final int NUMBER_OF_BLOCKS = 5;
+        final int NUMBER_OF_BLOCKS = 15;
 
         File file = new File("blockchain.txt");
         AsymmetricCryptography cipher = generateKeys();
@@ -30,10 +30,14 @@ public class Main {
         ExecutorService blockExecutor = Executors.newFixedThreadPool(4);
         for (int i = 0; i < NUMBER_OF_BLOCKS; i++) {
             blockExecutor.submit(() -> mine.createNewBlock(blockchain, cipher));
-
         }
-
-        blockExecutor.awaitTermination(10, TimeUnit.SECONDS);
+//        blockExecutor.awaitTermination(30, TimeUnit.SECONDS);
+        blockExecutor.shutdown();
+        while (!blockExecutor.isTerminated()) {
+            if (blockExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+                break;  // All tasks have completed, exit the loop
+            }
+        }
         //Main thread waits for blockchain creation
         blockchain.isChainValid(cipher);
         saveBlockchainToFile(blockchain, file);

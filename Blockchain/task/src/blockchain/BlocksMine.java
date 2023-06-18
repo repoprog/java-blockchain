@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class BlocksMine {
-    private List<Future<String>> future;
     private final int NUM_THREADS = 4;
     private final ExecutorService msgExecutor = Executors.newFixedThreadPool(NUM_THREADS);
     private final static Object LOCK = new Object();
@@ -20,40 +19,62 @@ public class BlocksMine {
     }
 
     public void createNewBlock(Blockchain chain, AsymmetricCryptography cipher) {
-        List<Future<String>> futuresMsg = generateRandomMsg();
+        //Create new List of futures with creation of every block
+        List<Future<Transaction>> futuresTrans = generateRandomTrans();
         synchronized (LOCK) {
 
-            // create new block and add random asynchronous generated msg to each block (after first)
+            // create new block and add random asynchronous generated trans to each block (after first)
             Block newBlock = chain.getBlocks().isEmpty() ? new Block(cipher) : new Block(chain.getSize() + 1,
                     chain.getBlock(chain.getSize() - 1).getHash(), nextBlockData);
 //            System.out.println("made block" + newBlock.getId() + " by " + Thread.currentThread().getName());
-
+            newBlock.setMinerID(Thread.currentThread().getId());
+            rewardMiner(newBlock);
             generateMagicNumber(newBlock);
             newBlock.setGenTime(getGenerationTime(newBlock));
-            newBlock.setMinerID(Thread.currentThread().getId());
             adjustMiningDifficulty(newBlock);
             chain.addBlock(newBlock);
-            chain.isChainValid(cipher);
-            generateBlockData(chain, cipher, futuresMsg);
+//            chain.isChainValid(cipher);
+            generateBlockData(chain, cipher, futuresTrans);
         }
     }
 
-    public static long getGenerationTime(Block newBlock) {
-        return (new Date().getTime() - newBlock.getTimeStamp()) / 1000;
+    public void rewardMiner(Block newBLock) {
+        int BLOCK_REWARD = 100;
+        Transaction reward = new Transaction("Blockchain", "miner"+ newBLock.getMinerID(), BLOCK_REWARD);
+        newBLock.setRewardTransaction(reward);
     }
 
-    public List<Future<String>> generateRandomMsg() {
-        List<Callable<String>> callables = new ArrayList<>();
+    public static long getGenerationTime(Block newBlock) {
+        // for stage 6 changed to milliseconds seconds = 1000
+        return (new Date().getTime() - newBlock.getTimeStamp());
+    }
+
+    public List<Future<Transaction>> generateRandomTrans() {
+        List<Callable<Transaction>> callables = new ArrayList<>();
         for (int i = 0; i < NUM_THREADS; i++) {
-            callables.add(() -> new RandomMsgGenerator().generate());
+            callables.add(Transaction::generateRandomTransaction);
         }
         try {
             return msgExecutor.invokeAll(callables);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
     }
+
+//    public void generateMagicNumber(Block newBlock) {
+//        long magicNumber = 0;
+//        String hash;
+//
+//        do {
+//            newBlock.setMagicNumber(magicNumber);
+//            hash = newBlock.calculateBlockHash();
+//            magicNumber++;
+//        } while (!hash.startsWith(proofNumber));
+//
+//        newBlock.setHash(hash);
+//    }
+
 
     public void generateMagicNumber(Block newBlock) {
         while (!newBlock.getHash().startsWith(proofNumber)) {
@@ -76,25 +97,23 @@ public class BlocksMine {
         }
     }
 
-    public void generateBlockData(Blockchain chain, AsymmetricCryptography cipher, List<Future<String>> futureMsg) {
-        List<String> message = synchronizeMsg(futureMsg);
-        BlockData data = new BlockData(chain.getDataID(), message, cipher);
-        data.signMessage(message);
+    public void generateBlockData(Blockchain chain, AsymmetricCryptography cipher, List<Future<Transaction>> futuresTran) {
+        List<Transaction> transactions = syncTransactions(futuresTran);
+        BlockData data = new BlockData(chain.getDataID(), transactions, cipher);
+        data.signTransactions(transactions);
         nextBlockData = data;
-//        System.out.println("Generate data method " + nextBlockData.getId() + " by " + Thread.currentThread().getName());
     }
 
-
-    public List<String> synchronizeMsg(List<Future<String>> futureMsg) {
-        List<String> message = new ArrayList<>();
-        for (Future<String> f : futureMsg) {
+    public List<Transaction> syncTransactions(List<Future<Transaction>> futuresTrans) {
+        List<Transaction> transactions = new ArrayList<>();
+        for (Future<Transaction> f : futuresTrans) {
             try { // current thread (from block executor) wait for messages
-                message.add(f.get());
+                transactions.add(f.get());
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
-        return message;
+        return transactions;
     }
 }
 
