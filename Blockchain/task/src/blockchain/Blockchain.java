@@ -1,6 +1,5 @@
 package blockchain;
 
-import org.w3c.dom.ls.LSOutput;
 
 import java.io.Serializable;
 import java.util.*;
@@ -32,53 +31,53 @@ public class Blockchain implements Serializable {
         return getSize() + 1;
     }
 
-    public boolean isChainValid(AsymmetricCryptography cipher) {
+    public boolean isChainValid(AsymmetricCryptography cipher, boolean verifyTransaction) {
 
-            Block previousBlock = blocks.get(0);
+        Block previousBlock = blocks.get(0);
 
-            for (int i = 1; i < blocks.size(); i++) {
-                Block currentBlock = blocks.get(i);
+        for (int i = 1; i < blocks.size(); i++) {
+            Block currentBlock = blocks.get(i);
 
-                // Verify previous block's hash
-                if (!currentBlock.getPreviousHash().equals(previousBlock.getHash())) {
-                    System.out.println("Invalid blockchain: Hash mismatch for block " + currentBlock.getId());
-                    return false;
-                }
-
-                // Verify block's hash
-                String calculatedHash = currentBlock.calculateBlockHash();
-                if (!currentBlock.getHash().equals(calculatedHash)) {
-                    System.out.println("Invalid blockchain: Invalid block hash for block " + currentBlock.getId());
-                    return false;
-                }
-
-                // Verify block data signature
-                BlockData blockData = currentBlock.getBlockData();
-                boolean isValidSignature = false;
-                    isValidSignature = cipher.verifySignature(
-                            blockData.getTransactions(),
-                            blockData.getSignature(),
-                            blockData.getPublicKey()
-                    );
-                if (!isValidSignature) {
-                    System.out.println("Invalid blockchain: Invalid signature for block " + currentBlock.getId());
-                    return false;
-                }
-
-                // Verify block data identifier
-                if (blockData.getId() <= previousBlock.getBlockData().getId()) {
-                    System.out.println("Invalid blockchain: Invalid block data identifier for block " + currentBlock.getId());
-                    return false;
-                }
-
-//                // Verify transactions in the block
-//                    if (!validateBlockTransactions(currentBlock.getBlockData().getTransactions())) {
-//                        System.out.println("Invalid blockchain: Invalid transactions in block " + currentBlock.getId());
-//                        return false;
-//                    }
-
-                previousBlock = currentBlock;
+            // Verify previous block's hash
+            if (!currentBlock.getPreviousHash().equals(previousBlock.getHash())) {
+                System.out.println("Invalid blockchain: Hash mismatch for block " + currentBlock.getId());
+                return false;
             }
+
+            // Verify block's hash
+            String calculatedHash = currentBlock.calculateBlockHash();
+            if (!currentBlock.getHash().equals(calculatedHash)) {
+                System.out.println("Invalid blockchain: Invalid block hash for block " + currentBlock.getId());
+                return false;
+            }
+
+            // Verify block data signature
+            BlockData blockData = currentBlock.getBlockData();
+            boolean isValidSignature = false;
+            isValidSignature = cipher.verifySignature(
+                    blockData.getTransactions(),
+                    blockData.getSignature(),
+                    blockData.getPublicKey()
+            );
+            if (!isValidSignature) {
+                System.out.println("Invalid blockchain: Invalid signature for block " + currentBlock.getId());
+                return false;
+            }
+
+            // Verify block data identifier
+            if (blockData.getId() <= previousBlock.getBlockData().getId()) {
+                System.out.println("Invalid blockchain: Invalid block data identifier for block " + currentBlock.getId());
+                return false;
+            }
+
+            // Verify transactions in the block
+            if (verifyTransaction && !validateBlockTransactions(currentBlock.getBlockData().getTransactions())) {
+                System.out.println("Invalid blockchain: Invalid transactions in block " + currentBlock.getId());
+                return false;
+            }
+
+            previousBlock = currentBlock;
+        }
         return true;
     }
 

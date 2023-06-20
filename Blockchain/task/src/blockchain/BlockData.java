@@ -14,8 +14,8 @@ public class BlockData implements Serializable {
     private transient AsymmetricCryptography cipher;
 
 
-    public BlockData(AsymmetricCryptography cipher) {
-        this(1, List.of(new Transaction("Block", "Someone", 100)), cipher);
+    public BlockData(int dataID, AsymmetricCryptography cipher) {
+        this(dataID, List.of(new Transaction("Block", "Someone", 100)), cipher);
     }
 
     public BlockData(int id,List<Transaction> transactions, AsymmetricCryptography cipher) {

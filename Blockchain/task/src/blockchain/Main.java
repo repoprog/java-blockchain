@@ -31,7 +31,7 @@ public class Main {
         for (int i = 0; i < NUMBER_OF_BLOCKS; i++) {
             blockExecutor.submit(() -> mine.createNewBlock(blockchain, cipher));
         }
-//        blockExecutor.awaitTermination(30, TimeUnit.SECONDS);
+
         blockExecutor.shutdown();
         while (!blockExecutor.isTerminated()) {
             if (blockExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
@@ -39,7 +39,7 @@ public class Main {
             }
         }
         //Main thread waits for blockchain creation
-        blockchain.isChainValid(cipher);
+        blockchain.isChainValid(cipher, false);
         saveBlockchainToFile(blockchain, file);
         System.out.println(blockchain);
     }

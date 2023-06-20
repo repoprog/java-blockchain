@@ -17,11 +17,6 @@ public class Block implements Serializable {
     private long genTime;
     private String diffNMsg;
 
-
-    public Block(AsymmetricCryptography cipher) {
-        this(1, "0", new BlockData(cipher));
-    }
-
     public Block(int id, String previousHash, BlockData blockData) {
         this.id = id;
         this.timeStamp = new Date().getTime();
@@ -86,7 +81,7 @@ public class Block implements Serializable {
 
     public String calculateBlockHash() {
         String dataToHash = rewardTransaction
-                +  previousHash
+                + previousHash
                 + timeStamp
                 + id
                 + magicNumber

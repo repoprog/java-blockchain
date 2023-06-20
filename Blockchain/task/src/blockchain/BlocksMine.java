@@ -22,31 +22,34 @@ public class BlocksMine {
         //Create new List of futures with creation of every block
         List<Future<Transaction>> futuresTrans = generateRandomTrans();
         synchronized (LOCK) {
-
-            // create new block and add random asynchronous generated trans to each block (after first)
-            Block newBlock = chain.getBlocks().isEmpty() ? new Block(cipher) : new Block(chain.getSize() + 1,
-                    chain.getBlock(chain.getSize() - 1).getHash(), nextBlockData);
-//            System.out.println("made block" + newBlock.getId() + " by " + Thread.currentThread().getName());
+            Block newBlock = createBlock(chain, cipher);
             newBlock.setMinerID(Thread.currentThread().getId());
             rewardMiner(newBlock);
             generateMagicNumber(newBlock);
             newBlock.setGenTime(getGenerationTime(newBlock));
             adjustMiningDifficulty(newBlock);
             chain.addBlock(newBlock);
-//            chain.isChainValid(cipher);
+            chain.isChainValid(cipher, false); // set to false for Jetbrains 15s time constrain testing
             generateBlockData(chain, cipher, futuresTrans);
         }
     }
 
+    public Block createBlock(Blockchain chain, AsymmetricCryptography cipher) {
+        int blockId = chain.getSize() + 1;
+        String previousHash = chain.getSize() > 0 ? chain.getBlock(chain.getSize() - 1).getHash() : "0";
+        BlockData blockData = chain.getSize() > 0 ? nextBlockData : new BlockData(chain.getDataID(), cipher);
+        return new Block(blockId, previousHash, blockData);
+    }
+
     public void rewardMiner(Block newBLock) {
         int BLOCK_REWARD = 100;
-        Transaction reward = new Transaction("Blockchain", "miner"+ newBLock.getMinerID(), BLOCK_REWARD);
+        Transaction reward = new Transaction("Blockchain", "miner" + newBLock.getMinerID(), BLOCK_REWARD);
         newBLock.setRewardTransaction(reward);
     }
 
     public static long getGenerationTime(Block newBlock) {
         // for stage 6 changed to milliseconds seconds = 1000
-        return (new Date().getTime() - newBlock.getTimeStamp());
+        return (new Date().getTime() - newBlock.getTimeStamp()) / 10;
     }
 
     public List<Future<Transaction>> generateRandomTrans() {
@@ -62,20 +65,6 @@ public class BlocksMine {
         }
     }
 
-//    public void generateMagicNumber(Block newBlock) {
-//        long magicNumber = 0;
-//        String hash;
-//
-//        do {
-//            newBlock.setMagicNumber(magicNumber);
-//            hash = newBlock.calculateBlockHash();
-//            magicNumber++;
-//        } while (!hash.startsWith(proofNumber));
-//
-//        newBlock.setHash(hash);
-//    }
-
-
     public void generateMagicNumber(Block newBlock) {
         while (!newBlock.getHash().startsWith(proofNumber)) {
             newBlock.setMagicNumber((long) (Math.random() * 100000000000L));
@@ -83,7 +72,7 @@ public class BlocksMine {
         }
     }
 
-    public synchronized void adjustMiningDifficulty(Block block) {
+    public void adjustMiningDifficulty(Block block) {
         int difficulty;
         if (block.getGenTime() < 15) {
             setProofNumber(proofNumber.length() + 1);
